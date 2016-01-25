@@ -1,0 +1,6 @@
+{
+  "extends": [
+    "jetbrains",
+    "jetbrains/node"
+  ]
+}
