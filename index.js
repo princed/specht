@@ -56,7 +56,10 @@ function getUrls(entry, enc, pipeCallback) {
     grepCallback(null, content);
   });
 
-  fs.createReadStream(entry.fullPath, {encoding: 'utf-8'}).pipe(grep).pipe(htmlParser);
+  fs.
+    createReadStream(entry.fullPath, {encoding: 'utf-8'}).
+    pipe(grep).
+    pipe(htmlParser);
 }
 
 function checkUrls(url, enc, checkCallback) {
