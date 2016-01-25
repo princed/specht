@@ -8,6 +8,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "escape-string-regexp": "1.0.4",
     "event-stream": "3.3.2",
     "https": "1.0.0",
     "parse5": "2.1.3",
