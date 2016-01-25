@@ -2,6 +2,7 @@
   "name": "check-help-links",
   "version": "1.0.0",
   "description": "Checks Hub help links against documentation",
+  "bin": "index.js",
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
