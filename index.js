@@ -20,6 +20,7 @@ var argv = require('yargs').
   alias('h', 'help').
   argv;
 
+var startTime = Date.now();
 var pages = Object.create(null);
 var rootList = argv.paths.split(',');
 var rootStream = rootList.map(function mapRootList(root) {
@@ -90,5 +91,9 @@ function checkUrls(url, enc, checkCallback) {
 if (!argv.help) {
   es.merge(rootStream).
     pipe(through2.obj(getUrls)).
-    pipe(through2(checkUrls));
+    pipe(through2(checkUrls)).
+    on('finish', function countTime() {
+      var ms = 1000;
+      console.log('Check finished in ' + (Date.now() - startTime) / ms + 's');
+    });
 }
