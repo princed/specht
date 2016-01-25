@@ -5,7 +5,7 @@
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "node ./index.js"
+    "lint": "eslint ."
   },
   "dependencies": {
     "event-stream": "3.3.2",
@@ -14,5 +14,14 @@
     "readdirp": "2.0.0",
     "through2": "2.0.0",
     "yargs": "3.32.0"
+  },
+  "devDependencies": {
+    "eslint": "1.10.3",
+    "eslint-config-jetbrains": "1.0.12",
+    "eslint-plugin-angular": "0.13.0",
+    "eslint-plugin-bdd": "1.1.0",
+    "eslint-plugin-filenames": "0.1.2",
+    "eslint-plugin-modules": "1.1.1",
+    "eslint-plugin-react": "3.6.3"
   }
 }
