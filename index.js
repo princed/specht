@@ -8,26 +8,38 @@ var es = require('event-stream');
 var escapeStringRegexp = require('escape-string-regexp');
 var through2 = require('through2');
 var parse5 = require('parse5');
+var gitIgnoreParser = require('gitignore-parser');
 
 var argv = require('yargs').
-  usage('Usage: $0 [options]').
-  demand(['prefix', 'paths']).
+  usage('Usage: $0 [path] [options]').
+  demand(['prefix']).
   describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').
-  describe('paths', 'Comma-delimited root paths, like: relative-path,/absolute/path/').
   default('filter', '*.{html,js}').
   default('html-extension', '.html').
   help('h').
   alias('h', 'help').
+  alias('f', 'filter').
+  alias('e', 'html-extension').
   argv;
 
 var startTime = Date.now();
 var pages = Object.create(null);
-var rootList = argv.paths.split(',');
-var rootStream = rootList.map(function mapRootList(root) {
-  return readdirp({
-    root: root,
-    fileFilter: argv.fileFilter
-  });
+var directoryFilter;
+try {
+  var gitignore = gitIgnoreParser.compile(fs.readFileSync('.gitignore', 'utf8'));
+  directoryFilter = function (entry) {
+    return gitignore.accepts(entry.path);
+  };
+} catch (e) {
+  directoryFilter = function () {
+    return true;
+  };
+}
+
+var rootStream = readdirp({
+  root: process.cwd() || argv._[0],
+  directoryFilter: directoryFilter,
+  fileFilter: argv.filter
 });
 
 var docUrlPattern = new RegExp(escapeStringRegexp(argv.prefix) + '[a-z0-9-]+' + escapeStringRegexp(argv.htmlExtension), 'ig');
