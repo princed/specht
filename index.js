@@ -9,7 +9,16 @@ var escapeStringRegexp = require('escape-string-regexp');
 var through2 = require('through2');
 var parse5 = require('parse5');
 
-var argv = require('yargs').usage('Usage: $0 [options]').demand(['prefix', 'paths']).describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').describe('paths', 'Comma-delimited root paths, like: relative-path,/absolute/path/').default('filter', '*.{html,js}').default('html-extension', '.html').help('h').alias('h', 'help').argv;
+var argv = require('yargs').
+  usage('Usage: $0 [options]').
+  demand(['prefix', 'paths']).
+  describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').
+  describe('paths', 'Comma-delimited root paths, like: relative-path,/absolute/path/').
+  default('filter', '*.{html,js}').
+  default('html-extension', '.html').
+  help('h').
+  alias('h', 'help').
+  argv;
 
 var pages = Object.create(null);
 var rootList = argv.paths.split(',');
