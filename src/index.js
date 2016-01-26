@@ -62,23 +62,20 @@ function getUrls(entry, enc, stopCallback) {
 }
 
 function checkUrls(url, enc, checkCallback) {
-  const urlString = url.toString();
-
   https.
-    get(urlString, res => {
-      console.log(`Got response: ${res.statusCode}`, urlString);
-      checkCallback(null, url);
+    get(url, ({statusCode}) => {
+      checkCallback(null, {statusCode, url});
     }).
-    on('error', e => {
-      console.log(`Got error: ${e.message}`);
-      checkCallback(null, url);
-    });
+    on('error', checkCallback);
 }
 
 if (!argv.help) {
   rootStream.
     pipe(through2.obj(getUrls)).
-    pipe(through2(checkUrls)).
+    pipe(through2.obj(checkUrls)).
+    on('data', res => {
+      console.log(`Got response: ${res.statusCode}`, res.url);
+    }).
     on('finish', () => {
       const ms = 1000;
       console.log(`Finished in ${(Date.now() - startTime) / ms} s`);
