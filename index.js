@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var path = require('path');
 var https = require('https');
 var fs = require('fs');
 
@@ -9,6 +10,10 @@ var escapeStringRegexp = require('escape-string-regexp');
 var through2 = require('through2');
 var parse5 = require('parse5');
 var gitIgnoreParser = require('gitignore-parser');
+
+var babylon = require('babylon');
+var traverse = require('babel-traverse').default;
+var types = require('babel-types');
 
 var argv = require('yargs').
   usage('Usage: $0 [path] [options]').
@@ -42,18 +47,49 @@ var rootStream = readdirp({
   fileFilter: argv.filter
 });
 
-var docUrlPattern = new RegExp(escapeStringRegexp(argv.prefix) + '[a-z0-9-]+' + escapeStringRegexp(argv.htmlExtension), 'ig');
 function buildDocUrl(id) {
   return argv.prefix + id + argv.htmlExtension;
 }
 
-function getUrls(entry, enc, pipeCallback) {
-  var fileStream = this; // eslint-disable-line consistent-this
+function parseJS(code, emitDocument, stopCallback) {
+  var ast = babylon.parse(code);
+  var argumentPosition = 0;
+  var functionName = 'getHelpUrlFilter';
+
+  traverse(ast, {
+    enter: function(path) {
+      if (
+        types.isCallExpression(path.node) &&
+        types.isIdentifier(path.node.callee, {name: functionName})
+      ) {
+        var arg = path.node.arguments[argumentPosition];
+
+        if (types.isStringLiteral(arg)) {
+          emitDocument(arg.value);
+        } else if (types.isIdentifier(arg)) {
+          var binding = path.scope.getBinding(arg.name);
+
+          if (binding &&
+            types.isVariableDeclarator(binding.path.node) &&
+            types.isStringLiteral(binding.path.node.init)
+          ) {
+            emitDocument(binding.path.node.init.value);
+          }
+        }
+      }
+    }
+  });
+
+  stopCallback();
+}
+
+function getUrls(entry, enc, stopCallback) {
+  var entryStream = this; // eslint-disable-line consistent-this
   var htmlParser = new parse5.SAXParser();
 
-  function emitUrl(url) {
+  function emitDocument(url) {
     if (!pages[url]) {
-      fileStream.push(url);
+      entryStream.push(buildDocUrl(url));
       pages[url] = true;
     }
   }
@@ -62,28 +98,29 @@ function getUrls(entry, enc, pipeCallback) {
     if (name === 'hub-page-help-link') {
       attrs.forEach(function eachAttr(attr) {
         if (attr.name === 'url') {
-          emitUrl(buildDocUrl(attr.value));
+          emitDocument(attr.value);
         }
       });
     }
   });
 
-  htmlParser.on('end', pipeCallback);
+  htmlParser.on('end', stopCallback);
 
-  var grep = through2(function grep(content, grepEnc, grepCallback) { // eslint-disable-line vars-on-top
-    var matches = content.toString().match(docUrlPattern);
+  if (path.extname(entry.name) === argv.htmlExtension) {
+    fs.
+      createReadStream(entry.fullPath, {encoding: 'utf-8'}).
+      pipe(htmlParser);
+  } else if (path.extname(entry.name) === '.js') {
+    fs.readFile(entry.fullPath, {encoding: 'utf-8'}, function (err, content) {
+      if (err) {
+        return stopCallback(err);
+      }
 
-    if (matches) {
-      matches.forEach(emitUrl);
-    }
-
-    grepCallback(null, content);
-  });
-
-  fs.
-    createReadStream(entry.fullPath, {encoding: 'utf-8'}).
-    pipe(grep).
-    pipe(htmlParser);
+      parseJS(content.toString(), emitDocument, stopCallback);
+    })
+  } else {
+    stopCallback();
+  }
 }
 
 function checkUrls(url, enc, checkCallback) {

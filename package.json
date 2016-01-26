@@ -9,6 +9,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "babel-traverse": "6.4.5",
+    "babel-types": "6.4.5",
+    "babylon": "6.4.5",
     "escape-string-regexp": "1.0.4",
     "event-stream": "3.3.2",
     "gitignore-parser": "0.0.2",
