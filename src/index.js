@@ -16,46 +16,37 @@ const argv = yargs.
   usage('Usage: $0 [path] [options]').
   demand(['prefix']).
   describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').
+  default('ignore-file', '.gitignore').
+  describe('ignore-file', 'File of ignores to be used as filter of directories').
   default('filter', '*.{html,js}').
+  describe('filter', 'Glob pattern to match files').
   default('html-extension', '.html').
-  help('h').
-  alias('h', 'help').
-  alias('f', 'filter').
-  alias('e', 'html-extension').
+  describe('html-extension', 'Extensions of JavaScript files, could be used more than once').
+  default('js-extension', '.js').
+  describe('js-extension', 'Extensions of HTML files, could be used more than once').
+  help('help').
   argv;
 
 const startTime = Date.now();
-const pages = Object.create(null);
-let directoryFilter;
-try {
-  const gitignore = gitIgnoreParser.compile(fs.readFileSync('.gitignore', 'utf8'));
-  directoryFilter = entry => gitignore.accepts(entry.path);
-} catch (e) {
-  directoryFilter = () => true;
-}
+const pages = new Set();
+const parserLookup = new Map();
 
-const rootStream = readdirp({
-  root: process.cwd() || argv._[0],
-  directoryFilter,
-  fileFilter: argv.filter
-});
-
-function buildDocUrl(id) {
-  return argv.prefix + id + argv.htmlExtension;
-}
+const jsExtension = Array.isArray(argv.jsExtension) ? argv.jsExtension : [argv.jsExtension];
+const htmlExtension = Array.isArray(argv.htmlExtension) ? argv.htmlExtension : [argv.htmlExtension];
+jsExtension.forEach(ext => parserLookup.set(ext, parseJS));
+htmlExtension.forEach(ext => parserLookup.set(ext, parseHTML));
 
 function getUrls(entry, enc, stopCallback) {
+  const parser = parserLookup.get(extname(entry.name));
   const emitDocument = url => {
-    if (!pages[url]) {
-      this.push(buildDocUrl(url));
-      pages[url] = true;
+    if (!pages.has(url)) {
+      this.push(`${argv.prefix}${url}.html`);
+      pages.add(url);
     }
   };
 
-  if (extname(entry.name) === argv.htmlExtension) {
-    parseHTML(entry.fullPath, emitDocument, stopCallback);
-  } else if (extname(entry.name) === '.js') {
-    parseJS(entry.fullPath, emitDocument, stopCallback);
+  if (parser) {
+    parser(entry.fullPath, emitDocument, stopCallback);
   } else {
     stopCallback();
   }
@@ -70,7 +61,19 @@ function checkUrls(url, enc, checkCallback) {
 }
 
 if (!argv.help) {
-  rootStream.
+  let directoryFilter;
+  try {
+    const gitignore = gitIgnoreParser.compile(fs.readFileSync(argv.ignoreFile, 'utf8'));
+    directoryFilter = entry => gitignore.accepts(entry.path);
+  } catch (e) {
+    // noop
+  }
+
+  readdirp({
+    root: process.cwd() || argv._[0],
+    directoryFilter,
+    fileFilter: argv.filter
+  }).
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
     on('data', res => {
