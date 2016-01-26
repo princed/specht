@@ -1,12 +1,23 @@
 {
   "name": "check-help-links",
   "version": "1.0.0",
-  "description": "Checks Hub help links against documentation",
-  "bin": "index.js",
-  "main": "index.js",
+  "description": "Checks JetBrains help links UI against real documentation server",
+  "bin": "lib/index.js",
   "license": "UNLICENSED",
+  "author": "Eugene Datsky",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint src",
+    "prepublish": "babel src --out-dir lib --source-maps"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "internal-npm-registry"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:princed/specht.git"
   },
   "dependencies": {
     "babel-traverse": "6.4.5",
@@ -20,6 +31,9 @@
     "yargs": "3.32.0"
   },
   "devDependencies": {
+    "babel-cli": "6.4.5",
+    "babel-eslint": "4.1.6",
+    "babel-preset-es2015": "6.3.13",
     "eslint": "1.10.3",
     "eslint-config-jetbrains": "1.0.12",
     "eslint-plugin-angular": "0.13.0",

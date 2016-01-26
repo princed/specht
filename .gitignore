@@ -3,3 +3,5 @@
 .idea/jsLinters/jshint.xml
 
 node_modules
+
+lib
