@@ -5,8 +5,6 @@ var https = require('https');
 var fs = require('fs');
 
 var readdirp = require('readdirp');
-var es = require('event-stream');
-var escapeStringRegexp = require('escape-string-regexp');
 var through2 = require('through2');
 var parse5 = require('parse5');
 var gitIgnoreParser = require('gitignore-parser');
@@ -138,7 +136,7 @@ function checkUrls(url, enc, checkCallback) {
 }
 
 if (!argv.help) {
-  es.merge(rootStream).
+  rootStream.
     pipe(through2.obj(getUrls)).
     pipe(through2(checkUrls)).
     on('finish', function countTime() {
