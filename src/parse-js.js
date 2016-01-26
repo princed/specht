@@ -5,7 +5,9 @@ import traverse from 'babel-traverse';
 import * as t from 'babel-types';
 
 function parseCode(code, emitDocument) {
-  const ast = parse(code);
+  const ast = parse(code, {
+    sourceType: 'module'
+  });
   const argumentPosition = 0;
   const functionName = 'getHelpUrlFilter';
 
@@ -22,7 +24,6 @@ function parseCode(code, emitDocument) {
 
         } else if (t.isIdentifier(arg)) {
           const binding = path.scope.getBinding(arg.name);
-
           if (binding &&
             t.isVariableDeclarator(binding.path.node) &&
             t.isStringLiteral(binding.path.node.init)
