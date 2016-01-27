@@ -14,12 +14,16 @@ import parseHTML from './parse-html';
 
 const argv = yargs.
   usage('Usage: $0 [path] [options]').
-  demand(['prefix']).
+  demand(['prefix', 'html-rules', 'js-rules']).
   describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').
   default('ignore-file', '.gitignore').
   describe('ignore-file', 'File of ignores to be used as filter of directories').
   default('filter', '*.{html,js}').
   describe('filter', 'Glob pattern to match files').
+  array('html-rules').
+  describe('html-rules', 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>]. Could be used more than once').
+  array('js-rules').
+  describe('js-rules', 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. Could be used more than once').
   default('html-extension', '.html').
   describe('html-extension', 'Extensions of JavaScript files, could be used more than once').
   default('js-extension', '.js').
@@ -29,15 +33,48 @@ const argv = yargs.
 
 const startTime = Date.now();
 const pages = new Set();
-const parserLookup = new Map();
+const langProps = new Map();
 
 const jsExtension = Array.isArray(argv.jsExtension) ? argv.jsExtension : [argv.jsExtension];
 const htmlExtension = Array.isArray(argv.htmlExtension) ? argv.htmlExtension : [argv.htmlExtension];
-jsExtension.forEach(ext => parserLookup.set(ext, parseJS));
-htmlExtension.forEach(ext => parserLookup.set(ext, parseHTML));
+
+const RULE_DELIMITER = ':';
+function convertRules(rules, defaultValue) {
+  const lookup = new Map();
+
+  rules.forEach(rule => {
+    const [key, ...ruleParts] = rule.split(RULE_DELIMITER);
+
+    switch (ruleParts.length) {
+      case 0:
+        if (defaultValue == null) {
+          throw new Error(`Attribute name for tag “${key}” is expected.`);
+        }
+        lookup.set(key, defaultValue);
+        break;
+
+      case 1:
+        lookup.set(key, ruleParts[0]);
+        break;
+
+      case 2:
+        lookup.set(key + RULE_DELIMITER + ruleParts[0], ruleParts[1]);
+        break;
+
+      default:
+        throw new Error(`Rule must contain maximum 2 delimiters (${RULE_DELIMITER})`);
+    }
+  });
+
+  return lookup;
+}
+const htmlParams = {parser: parseJS, rules: convertRules(argv.jsRules, 0)};
+const jsParams = {parser: parseHTML, rules: convertRules(argv.htmlRules)};
+jsExtension.forEach(ext => langProps.set(ext, htmlParams));
+htmlExtension.forEach(ext => langProps.set(ext, jsParams));
 
 function getUrls(entry, enc, stopCallback) {
-  const parser = parserLookup.get(extname(entry.name));
+  const params = langProps.get(extname(entry.name));
   const emitDocument = url => {
     if (!pages.has(url)) {
       this.push(`${argv.prefix}${url}.html`);
@@ -45,8 +82,8 @@ function getUrls(entry, enc, stopCallback) {
     }
   };
 
-  if (parser) {
-    parser(entry.fullPath, emitDocument, stopCallback);
+  if (params) {
+    params.parser(entry.fullPath, params.rules, emitDocument, stopCallback);
   } else {
     stopCallback();
   }

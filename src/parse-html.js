@@ -1,13 +1,15 @@
 import {SAXParser} from 'parse5';
 import {createReadStream} from 'fs';
 
-export default function parseHTML(path, emitDocument, stopCallback) {
+export default function parseHTML(path, rules, emitDocument, stopCallback) {
   const htmlParser = new SAXParser();
 
   htmlParser.on('startTag', (name, attrs) => {
-    if (name === 'hub-page-help-link') {
+    const attribute = rules.get(name);
+
+    if (attribute) {
       attrs.forEach(attr => {
-        if (attr.name === 'url') {
+        if (attr.name === attribute) {
           emitDocument(attr.value);
         }
       });
