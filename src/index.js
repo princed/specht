@@ -2,42 +2,60 @@
 import 'babel-polyfill';
 
 import https from 'https';
-import fs from 'fs';
-import {extname} from 'path';
+import {readFile} from 'fs';
+import {format} from 'util';
+import {resolve, extname} from 'path';
 
 import readdirp from 'readdirp';
 import through2 from 'through2';
-import gitIgnoreParser from 'gitignore-parser';
+import gitignoreParser from 'gitignore-parser';
 import yargs from 'yargs';
 
 import parseJS from './parse-js';
 import parseHTML from './parse-html';
 
-const argv = yargs.
-  usage('Usage: $0 [path] [options]').
-  demand(['prefix', 'html-rules', 'js-rules']).
-  describe('prefix', 'Help site prefix, like: https://www.jetbrains.com/hub/help/1.0/').
-  default('ignore-file', '.gitignore').
-  describe('ignore-file', 'File of ignores to be used as filter of directories').
-  default('filter', '*.{html,js}').
-  describe('filter', 'Glob pattern to match files').
-  array('html-rules').
-  describe('html-rules', 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>]. Could be used more than once').
-  array('js-rules').
-  describe('js-rules', 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. Could be used more than once').
-  default('html-extension', '.html').
-  describe('html-extension', 'Extensions of JavaScript files, could be used more than once').
-  default('js-extension', '.js').
-  describe('js-extension', 'Extensions of HTML files, could be used more than once').
+const {pattern, jsExtension, htmlExtension, jsRules, htmlRules, ignoreFile, help, _: [root = process.cwd()]} = yargs.
+  usage(`Usage: $0 [path] [options]
+
+Example: $0 client-side \\
+--pattern https://www.jetbrains.com/hub/help/1.0/%s.html \\
+--ignore-file .gitignore \\
+--html-rules svg:xlink:href hub-page-help-link:url \\
+--js-rules getHelpUrlFilter getSome:1 \\
+--html-extension .html .htm`).
+  option('pattern', {
+    describe: 'Help site pattern, like: https://www.jetbrains.com/hub/help/1.0/%s.html',
+    demand: true
+  }).
+  option('ignore-file', {
+    describe: 'Files and directories to ignore, uses .gitgnore format. Relative from path.'
+  }).
+  option('html-rules', {
+    describe: 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>].',
+    array: true,
+    demand: true
+  }).
+  option('js-rules', {
+    describe: 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. XML namespaces for attributes are supported.',
+    array: true,
+    demand: true
+  }).
+  option('html-extension', {
+    describe: 'Extensions of HTML files',
+    array: true,
+    default: ['.html']
+  }).
+  option('js-extension', {
+    describe: 'Extensions of JavaScript files',
+    array: true,
+    default: ['.js']
+  }).
   help('help').
   argv;
 
 const startTime = Date.now();
 const pages = new Set();
 const langProps = new Map();
-
-const jsExtension = Array.isArray(argv.jsExtension) ? argv.jsExtension : [argv.jsExtension];
-const htmlExtension = Array.isArray(argv.htmlExtension) ? argv.htmlExtension : [argv.htmlExtension];
 
 const RULE_DELIMITER = ':';
 function convertRules(rules, defaultValue) {
@@ -58,8 +76,9 @@ function convertRules(rules, defaultValue) {
         lookup.set(key, ruleParts[0]);
         break;
 
+      // Support attributes with namespaces
       case 2:
-        lookup.set(key + RULE_DELIMITER + ruleParts[0], ruleParts[1]);
+        lookup.set(key, ruleParts.join(RULE_DELIMITER));
         break;
 
       default:
@@ -69,8 +88,9 @@ function convertRules(rules, defaultValue) {
 
   return lookup;
 }
-const htmlParams = {parser: parseJS, rules: convertRules(argv.jsRules, 0)};
-const jsParams = {parser: parseHTML, rules: convertRules(argv.htmlRules)};
+
+const htmlParams = {parser: parseJS, rules: convertRules(jsRules, 0)};
+const jsParams = {parser: parseHTML, rules: convertRules(htmlRules)};
 jsExtension.forEach(ext => langProps.set(ext, htmlParams));
 htmlExtension.forEach(ext => langProps.set(ext, jsParams));
 
@@ -78,7 +98,7 @@ function getUrls({name, fullPath}, enc, next) {
   const {rules, parser} = langProps.get(extname(name)) || {};
   const push = url => {
     if (!pages.has(url)) {
-      this.push(`${argv.prefix}${url}.html`);
+      this.push(format(pattern, url));
       pages.add(url);
     }
   };
@@ -98,20 +118,29 @@ function checkUrls(url, enc, next) {
     on('error', next);
 }
 
-if (!argv.help) {
-  let directoryFilter;
-  try {
-    const gitignore = gitIgnoreParser.compile(fs.readFileSync(argv.ignoreFile, 'utf8'));
-    directoryFilter = entry => gitignore.accepts(entry.path);
-  } catch (e) {
-    // noop
+function getFilters(callback) {
+  const extensions = [...htmlExtension, ...jsExtension];
+  const filterByExtension = entry => extensions.includes(extname(entry.name));
+
+  if (!ignoreFile) {
+    return callback(filterByExtension);
   }
 
-  readdirp({
-    root: process.cwd() || argv._[0],
-    directoryFilter,
-    fileFilter: argv.filter
-  }).
+  readFile(resolve(root, ignoreFile), {encoding: 'utf8'}, (err, content) => {
+    if (err) {
+      throw err;
+    }
+
+    const gitignore = gitignoreParser.compile(content);
+    const fileFilter = entry => filterByExtension(entry) && gitignore.accepts(entry.path);
+    const directoryFilter = entry => gitignore.accepts(entry.path);
+
+    callback(fileFilter, directoryFilter);
+  });
+}
+
+function start(fileFilter, directoryFilter) {
+  readdirp({root, fileFilter, directoryFilter}).
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
     on('data', res => {
@@ -119,6 +148,10 @@ if (!argv.help) {
     }).
     on('finish', () => {
       const ms = 1000;
-      console.log(`Finished in ${(Date.now() - startTime) / ms} s`);
+      console.log(`Finished in ${(Date.now() - startTime) / ms}s`);
     });
+}
+
+if (!help) {
+  getFilters(start);
 }
