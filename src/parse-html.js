@@ -1,7 +1,7 @@
 import {SAXParser} from 'parse5';
 import {createReadStream} from 'fs';
 
-export default function parseHTML(path, rules, emitDocument, stopCallback) {
+export default function parseHTML({fullPath, rules, push, next}) {
   const htmlParser = new SAXParser();
 
   htmlParser.on('startTag', (name, attrs) => {
@@ -10,13 +10,13 @@ export default function parseHTML(path, rules, emitDocument, stopCallback) {
     if (attribute) {
       attrs.forEach(attr => {
         if (attr.name === attribute) {
-          emitDocument(attr.value);
+          push(attr.value);
         }
       });
     }
   });
 
-  htmlParser.on('end', stopCallback);
+  htmlParser.on('end', next);
 
-  createReadStream(path, {encoding: 'utf-8'}).pipe(htmlParser);
+  createReadStream(fullPath, {encoding: 'utf-8'}).pipe(htmlParser);
 }

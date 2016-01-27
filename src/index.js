@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'babel-polyfill';
 
 import https from 'https';
 import fs from 'fs';
@@ -73,28 +74,28 @@ const jsParams = {parser: parseHTML, rules: convertRules(argv.htmlRules)};
 jsExtension.forEach(ext => langProps.set(ext, htmlParams));
 htmlExtension.forEach(ext => langProps.set(ext, jsParams));
 
-function getUrls(entry, enc, stopCallback) {
-  const params = langProps.get(extname(entry.name));
-  const emitDocument = url => {
+function getUrls({name, fullPath}, enc, next) {
+  const {rules, parser} = langProps.get(extname(name)) || {};
+  const push = url => {
     if (!pages.has(url)) {
       this.push(`${argv.prefix}${url}.html`);
       pages.add(url);
     }
   };
 
-  if (params) {
-    params.parser(entry.fullPath, params.rules, emitDocument, stopCallback);
+  if (parser) {
+    parser({fullPath, rules, push, next});
   } else {
-    stopCallback();
+    next();
   }
 }
 
-function checkUrls(url, enc, checkCallback) {
+function checkUrls(url, enc, next) {
   https.
     get(url, ({statusCode}) => {
-      checkCallback(null, {statusCode, url});
+      next(null, {statusCode, url});
     }).
-    on('error', checkCallback);
+    on('error', next);
 }
 
 if (!argv.help) {

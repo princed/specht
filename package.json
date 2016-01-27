@@ -20,6 +20,7 @@
     "url": "git@github.com:princed/specht.git"
   },
   "dependencies": {
+    "babel-polyfill": "6.3.14",
     "babel-traverse": "6.4.5",
     "babel-types": "6.4.5",
     "babylon": "6.4.5",
