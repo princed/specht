@@ -10,11 +10,22 @@ import readdirp from 'readdirp';
 import through2 from 'through2';
 import gitignoreParser from 'gitignore-parser';
 import yargs from 'yargs';
+import {testStarted, testFinished, testFailed} from 'teamcity-service-messages';
 
 import parseJS from './parse-js';
 import parseHTML from './parse-html';
 
-const {pattern, jsExtension, htmlExtension, jsRules, htmlRules, ignoreFile, help, _: [root = process.cwd()]} = yargs.
+const {
+  pattern,
+  jsExtension,
+  htmlExtension,
+  jsRules,
+  htmlRules,
+  ignoreFile,
+  help,
+  teamcity,
+  _: [root = process.cwd()]
+  } = yargs.
   usage(`Usage: $0 [path] [options]
 
 Example: $0 client-side \\
@@ -22,7 +33,8 @@ Example: $0 client-side \\
 --ignore-file .gitignore \\
 --html-rules svg:xlink:href hub-page-help-link:url \\
 --js-rules getHelpUrlFilter getSome:1 \\
---html-extension .html .htm`).
+--html-extension .html .htm \\
+--teamcity`).
   option('pattern', {
     describe: 'Help site pattern, like: https://www.jetbrains.com/hub/help/1.0/%s.html',
     demand: true
@@ -50,12 +62,17 @@ Example: $0 client-side \\
     array: true,
     default: ['.js']
   }).
+  option('teamcity', {
+    describe: 'Report check results to TeamCity',
+    boolean: true
+  }).
   help('help').
   argv;
 
 const startTime = Date.now();
 const pages = new Set();
 const langProps = new Map();
+const SUCCESS_CODE = 200;
 
 const RULE_DELIMITER = ':';
 function convertRules(rules, defaultValue) {
@@ -143,8 +160,17 @@ function start(fileFilter, directoryFilter) {
   readdirp({root, fileFilter, directoryFilter}).
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
-    on('data', res => {
-      console.log(`Got response: ${res.statusCode}`, res.url);
+    on('data', ({statusCode, url}) => {
+      console.log(`Got response ${statusCode} from ${url}`);
+
+      if (teamcity) {
+        testStarted({name: url});
+
+        if (statusCode !== SUCCESS_CODE) {
+          testFailed({name: url});
+        }
+        testFinished({name: url});
+      }
     }).
     on('finish', () => {
       const ms = 1000;
