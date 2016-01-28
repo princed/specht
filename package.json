@@ -1,5 +1,5 @@
 {
-  "name": "check-ui-links",
+  "name": "jetbrains-check-ui-links",
   "version": "1.0.0",
   "description": "Checks JetBrains help links UI against real documentation server",
   "bin": "lib/index.js",
