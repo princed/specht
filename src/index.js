@@ -25,7 +25,7 @@ const {
   help,
   teamcity,
   _: [root = process.cwd()]
-  } = yargs.
+} = yargs.
   usage(`Usage: $0 [path] [options]
 
 Example: $0 client-side \\
@@ -167,7 +167,7 @@ function start(fileFilter, directoryFilter) {
         testStarted({name: url});
 
         if (statusCode !== SUCCESS_CODE) {
-          testFailed({name: url});
+          testFailed({name: url, message: `Got response ${statusCode}`});
         }
         testFinished({name: url});
       }
