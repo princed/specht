@@ -2,6 +2,7 @@
 import 'babel-polyfill';
 
 import https from 'https';
+import http from 'http';
 import {readFile} from 'fs';
 import {format} from 'util';
 import {resolve, extname} from 'path';
@@ -127,8 +128,16 @@ function getUrls({name, fullPath}, enc, next) {
   }
 }
 
+const handlers = {http, https};
 function checkUrls(url, enc, next) {
-  https.
+  const [protocol] = url.split('://');
+  const handler = handlers[protocol];
+
+  if (!handler) {
+    throw new Error(`Protocol “${protocol}” from url “${url}” is not supported.`);
+  }
+
+  handler.
     get(url, ({statusCode}) => {
       next(null, {statusCode, url});
     }).
