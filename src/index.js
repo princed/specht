@@ -3,13 +3,12 @@ import 'babel-polyfill';
 
 import https from 'https';
 import http from 'http';
-import {readFile} from 'fs';
 import {format} from 'util';
 import {resolve, extname} from 'path';
 
 import readdirp from 'readdirp';
 import through2 from 'through2';
-import gitignoreParser from 'gitignore-parser';
+import ignore from 'ignore-file';
 import yargs from 'yargs';
 import {testStarted, testFinished, testFailed} from 'teamcity-service-messages';
 
@@ -152,14 +151,13 @@ function getFilters(callback) {
     return callback(filterByExtension);
   }
 
-  readFile(resolve(root, ignoreFile), {encoding: 'utf8'}, (err, content) => {
+  ignore(resolve(root, ignoreFile), (err, filter) => {
     if (err) {
       throw err;
     }
 
-    const gitignore = gitignoreParser.compile(content);
-    const fileFilter = entry => filterByExtension(entry) && gitignore.accepts(entry.path);
-    const directoryFilter = entry => gitignore.accepts(entry.path);
+    const fileFilter = entry => filterByExtension(entry) && !filter(entry.path);
+    const directoryFilter = entry => !filter(entry.path);
 
     callback(fileFilter, directoryFilter);
   });
