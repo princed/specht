@@ -28,29 +28,27 @@ const {
 } = yargs.
   usage(`Usage: $0 [path] [options]
 
-Example: $0 client-side \\
+Example: $0 path/to/start/from \\
 --pattern https://www.jetbrains.com/hub/help/1.0/%s.html \\
 --ignore-file .gitignore \\
 --html-rules svg:xlink:href hub-page-help-link:url \\
---js-rules getHelpUrlFilter getSome:1 \\
+--js-rules getHelpUrlFilter getHelpUrlInSecondParameter:1 \\
 --html-extension .html .htm \\
 --teamcity`).
   option('pattern', {
-    describe: 'Help site pattern, like: https://www.jetbrains.com/hub/help/1.0/%s.html',
-    demand: true
+    describe: 'Help site pattern, e.g.: https://www.jetbrains.com/hub/help/1.0/%s.html. “%s” placeholder is replaced with parts found by parsers',
+    default: '%s'
   }).
   option('ignore-file', {
     describe: 'Files and directories to ignore, uses .gitgnore format. Relative from path.'
   }).
   option('html-rules', {
     describe: 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>].',
-    array: true,
-    demand: true
+    array: true
   }).
   option('js-rules', {
     describe: 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. XML namespaces for attributes are supported.',
-    array: true,
-    demand: true
+    array: true
   }).
   option('html-extension', {
     describe: 'Extensions of HTML files',
@@ -69,13 +67,11 @@ Example: $0 client-side \\
   help('help').
   argv;
 
-const startTime = Date.now();
 const pages = new Set();
 const langProps = new Map();
-const SUCCESS_CODE = 200;
 
-const RULE_DELIMITER = ':';
 function convertRules(rules, defaultValue) {
+  const RULE_DELIMITER = ':';
   const lookup = new Map();
 
   rules.forEach(rule => {
@@ -106,11 +102,6 @@ function convertRules(rules, defaultValue) {
   return lookup;
 }
 
-const htmlParams = {parser: parseJS, rules: convertRules(jsRules, 0)};
-const jsParams = {parser: parseHTML, rules: convertRules(htmlRules)};
-jsExtension.forEach(ext => langProps.set(ext, htmlParams));
-htmlExtension.forEach(ext => langProps.set(ext, jsParams));
-
 function getUrls({name, fullPath}, enc, next) {
   const {rules, parser} = langProps.get(extname(name)) || {};
   const push = url => {
@@ -137,14 +128,11 @@ function checkUrls(url, enc, next) {
   }
 
   handler.
-    get(url, ({statusCode}) => {
-      next(null, {statusCode, url});
-    }).
+    get(url, ({statusCode}) => next(null, {statusCode, url})).
     on('error', next);
 }
 
-function getFilters(callback) {
-  const extensions = [...htmlExtension, ...jsExtension];
+function getFilters(extensions, callback) {
   const filterByExtension = entry => extensions.includes(extname(entry.name));
 
   if (!ignoreFile) {
@@ -164,6 +152,9 @@ function getFilters(callback) {
 }
 
 function start(fileFilter, directoryFilter) {
+  const startTime = Date.now();
+  const SUCCESS_CODE = 200;
+
   readdirp({root, fileFilter, directoryFilter}).
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
@@ -186,5 +177,21 @@ function start(fileFilter, directoryFilter) {
 }
 
 if (!help) {
-  getFilters(start);
+  if (!jsRules && !htmlRules) {
+    throw new Error('No search rules have been provided');
+  }
+
+  const extensions = [];
+  if (htmlRules) {
+    extensions.push(...htmlExtension);
+    const htmlParams = {parser: parseHTML, rules: convertRules(htmlRules)};
+    htmlExtension.forEach(ext => langProps.set(ext, htmlParams));
+  }
+  if (jsRules) {
+    extensions.push(...jsExtension);
+    const jsParams = {parser: parseJS, rules: convertRules(jsRules, 0)};
+    jsExtension.forEach(ext => langProps.set(ext, jsParams));
+  }
+
+  getFilters(extensions, start);
 }
