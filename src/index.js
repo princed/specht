@@ -170,8 +170,6 @@ function start(fileFilter, directoryFilter) {
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
     on('data', ({statusCode, url}) => {
-      console.log(`Got response ${statusCode} from ${url}`);
-
       if (teamcity) {
         testStarted({name: url});
 
@@ -179,6 +177,8 @@ function start(fileFilter, directoryFilter) {
           testFailed({name: url, message: `Got response ${statusCode}`});
         }
         testFinished({name: url});
+      } else {
+        console.log(`Got response ${statusCode} from ${url}`);
       }
     }).
     on('finish', () => {
