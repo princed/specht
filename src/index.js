@@ -67,7 +67,7 @@ Example: $0 path/to/start/from \\
   help('help').
   argv;
 
-const pages = new Set();
+const documents = new Map();
 const langProps = new Map();
 
 function convertRules(rules, defaultValue) {
@@ -102,12 +102,12 @@ function convertRules(rules, defaultValue) {
   return lookup;
 }
 
-function getUrls({name, fullPath}, enc, next) {
+function getUrls({name, path, fullPath}, enc, next) {
   const {rules, parser} = langProps.get(extname(name)) || {};
   const push = document => {
-    if (!pages.has(document)) {
+    if (!documents.has(document)) {
       this.push(document);
-      pages.add(document);
+      documents.set(document, path);
     }
   };
 
@@ -164,7 +164,8 @@ function start(fileFilter, directoryFilter) {
         testStarted({name: document});
 
         if (statusCode !== SUCCESS_CODE) {
-          testFailed({name: document, message: `Got response ${statusCode} from ${url}`});
+          const message = `Got response ${statusCode} from ${url}. At first found in path: ${documents.get(document)}.`;
+          testFailed({name: document, message});
         }
         testFinished({name: document});
       } else {
