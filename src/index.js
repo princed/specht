@@ -104,10 +104,10 @@ function convertRules(rules, defaultValue) {
 
 function getUrls({name, fullPath}, enc, next) {
   const {rules, parser} = langProps.get(extname(name)) || {};
-  const push = url => {
-    if (!pages.has(url)) {
-      this.push(format(pattern, url));
-      pages.add(url);
+  const push = document => {
+    if (!pages.has(document)) {
+      this.push(document);
+      pages.add(document);
     }
   };
 
@@ -119,7 +119,8 @@ function getUrls({name, fullPath}, enc, next) {
 }
 
 const handlers = {http, https};
-function checkUrls(url, enc, next) {
+function checkUrls(document, enc, next) {
+  const url = format(pattern, document);
   const [protocol] = url.split('://');
   const handler = handlers[protocol];
 
@@ -128,7 +129,7 @@ function checkUrls(url, enc, next) {
   }
 
   handler.
-    get(url, ({statusCode}) => next(null, {statusCode, url})).
+    get(url, ({statusCode}) => next(null, {statusCode, url, document})).
     on('error', next);
 }
 
@@ -158,14 +159,14 @@ function start(fileFilter, directoryFilter) {
   readdirp({root, fileFilter, directoryFilter}).
     pipe(through2.obj(getUrls)).
     pipe(through2.obj(checkUrls)).
-    on('data', ({statusCode, url}) => {
+    on('data', ({statusCode, url, document}) => {
       if (teamcity) {
-        testStarted({name: url});
+        testStarted({name: document});
 
         if (statusCode !== SUCCESS_CODE) {
-          testFailed({name: url, message: `Got response ${statusCode}`});
+          testFailed({name: document, message: `Got response ${statusCode} from ${url}`});
         }
-        testFinished({name: url});
+        testFinished({name: document});
       } else {
         console.log(`Got response ${statusCode} from ${url}`);
       }
