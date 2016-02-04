@@ -34,7 +34,9 @@ Example: $0 path/to/start/from \\
 --html-rules svg:xlink:href hub-page-help-link:url \\
 --js-rules getHelpUrlFilter getHelpUrlInSecondParameter:1 \\
 --html-extension .html .htm \\
---teamcity`).
+--teamcity
+
+At least one of --js-rules or --html-rules parameters is required. Will exit with code 1 otherwise.`).
   option('pattern', {
     describe: 'Help site pattern, e.g.: https://www.jetbrains.com/hub/help/1.0/%s.html. “%s” placeholder is replaced with parts found by parsers',
     default: '%s'
