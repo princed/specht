@@ -7,7 +7,23 @@ import * as t from 'babel-types';
 function parseCode(code, rules, push) {
   const errors = [];
   const ast = parse(code, {
-    sourceType: 'module'
+    sourceType: 'module',
+    plugins: [
+      'jsx',
+      'flow',
+      'asyncFunctions',
+      'classConstructorCall',
+      'doExpressions',
+      'trailingFunctionCommas',
+      'objectRestSpread',
+      'decorators',
+      'classProperties',
+      'exportExtensions',
+      'exponentiationOperator',
+      'asyncGenerators',
+      'functionBind',
+      'functionSent'
+    ]
   });
 
   traverse(ast, {
