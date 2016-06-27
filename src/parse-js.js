@@ -64,9 +64,17 @@ export default function parseJS({fullPath, rules, push, next}) {
       return next(err);
     }
 
-    const [error] = parseCode(content.toString(), rules, push);
-    if (error) {
-      const {name, pos: {column, line}} = error;
+    let errors;
+
+    try {
+      errors = parseCode(content.toString(), rules, push);
+    } catch (e) {
+      const {message, loc: {column, line}} = e;
+      return next(new Error(`Babel parsing error: ${message}\n    at ${fullPath}:${line}:${column}`));
+    }
+
+    if (errors[0]) {
+      const {name, pos: {column, line}} = errors[0];
       // Mimic real stacktrace to make it clickable in IDE
       return next(new Error(`Function ${name} have undetectable arguments\n    at ${fullPath}:${line}:${column}`));
     }
