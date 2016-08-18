@@ -25,11 +25,11 @@ Options:
                                                                  [default: "%s"]
   --ignore-file     Files and directories to ignore, uses .gitgnore format.
                     Relative from path.
-  --html-rules      Rules of parsing JavaScript files, in form of <function
-                    name>[:<argument number, default is 0>].             [array]
-  --js-rules        Rules of parsing HTML files, in form of <tag
+  --html-rules      Rules of parsing HTML files, in form of <tag
                     name>:<attribute name>. XML namespaces for attributes are
                     supported.                                           [array]
+  --js-rules        Rules of parsing JavaScript files, in form of <function
+                    name>[:<argument number, default is 0>].             [array]
   --html-extension  Extensions of HTML files        [array] [default: [".html"]]
   --js-extension    Extensions of JavaScript files    [array] [default: [".js"]]
   --teamcity        Report check results to TeamCity                   [boolean]

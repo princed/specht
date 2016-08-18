@@ -45,11 +45,11 @@ At least one of --js-rules or --html-rules parameters is required. Will exit wit
     describe: 'Files and directories to ignore, uses .gitgnore format. Relative from path.'
   }).
   option('html-rules', {
-    describe: 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>].',
+    describe: 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. XML namespaces for attributes are supported.',
     array: true
   }).
   option('js-rules', {
-    describe: 'Rules of parsing HTML files, in form of <tag name>:<attribute name>. XML namespaces for attributes are supported.',
+    describe: 'Rules of parsing JavaScript files, in form of <function name>[:<argument number, default is 0>].',
     array: true
   }).
   option('html-extension', {
