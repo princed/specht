@@ -1,13 +1,19 @@
-Check UI Links
-==============
+Specht
+======
+
+## Installation
 
 ```
-$ npm install check-ui-links --save 
-$ check-ui-links --help
+$ npm install specht --save
+```
 
-Usage: check-ui-links [path] [options]
+## Usage
+```
+$ specht --help
 
-Example: check-ui-links path/to/start/from \
+Usage: specht [path] [options]
+
+Example: specht path/to/start/from \
 --pattern https://www.jetbrains.com/hub/help/1.0/%s.html \
 --ignore-file .gitignore \
 --html-rules svg:xlink:href hub-page-help-link:url \

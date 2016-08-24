@@ -1,10 +1,13 @@
 {
-  "name": "jetbrains-check-ui-links",
+  "name": "specht",
   "version": "1.0.0",
-  "description": "Checks JetBrains help links UI against real documentation server",
+  "description": "Check links found in html or js files by pattern",
   "bin": "lib/index.js",
-  "license": "UNLICENSED",
-  "author": "Eugene Datsky",
+  "license": "MIT",
+  "author": {
+    "name": "Eugene Datsky",
+    "email": "eugene@datsky.ru"
+  },
   "scripts": {
     "lint": "eslint src",
     "prepublish": "babel src --out-dir lib --source-maps"
@@ -12,12 +15,12 @@
   "files": [
     "lib"
   ],
-  "publishConfig": {
-    "registry": "internal-npm-registry"
-  },
   "repository": {
     "type": "git",
-    "url": "git@github.com:princed/specht.git"
+    "url": "https://github.com/princed/specht.git"
+  },
+  "bugs": {
+    "url": "https://github.com/princed/specht/issues"
   },
   "dependencies": {
     "babel-polyfill": "6.3.14",
