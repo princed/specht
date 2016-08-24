@@ -139,7 +139,8 @@ function getFilters(extensions, callback) {
   const filterByExtension = entry => extensions.includes(extname(entry.name));
 
   if (!ignoreFile) {
-    return callback(filterByExtension);
+    callback(filterByExtension);
+    return;
   }
 
   ignore(resolve(root, ignoreFile), (err, filter) => {
@@ -154,6 +155,7 @@ function getFilters(extensions, callback) {
   });
 }
 
+// TODO: Use pipe to stdout instead of console.log
 function start(fileFilter, directoryFilter) {
   const startTime = Date.now();
   const SUCCESS_CODE = 200;

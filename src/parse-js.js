@@ -40,7 +40,6 @@ function parseCode(code, rules, push) {
 
         if (t.isStringLiteral(argument)) {
           push(argument.value);
-
         } else if (t.isIdentifier(argument)) {
           const binding = path.scope.getBinding(argument.name);
           const node = binding && binding.path.node;
@@ -61,7 +60,8 @@ function parseCode(code, rules, push) {
 export default function parseJS({fullPath, rules, push, next}) {
   readFile(fullPath, {encoding: 'utf-8'}, (err, content) => {
     if (err) {
-      return next(err);
+      next(err);
+      return;
     }
 
     let errors;
@@ -70,13 +70,15 @@ export default function parseJS({fullPath, rules, push, next}) {
       errors = parseCode(content.toString(), rules, push);
     } catch (e) {
       const {message, loc: {column, line}} = e;
-      return next(new Error(`Babel parsing error: ${message}\n    at ${fullPath}:${line}:${column}`));
+      next(new Error(`Babel parsing error: ${message}\n    at ${fullPath}:${line}:${column}`));
+      return;
     }
 
     if (errors[0]) {
       const {name, pos: {column, line}} = errors[0];
       // Mimic real stacktrace to make it clickable in IDE
-      return next(new Error(`Function ${name} have undetectable arguments\n    at ${fullPath}:${line}:${column}`));
+      next(new Error(`Function ${name} have undetectable arguments\n    at ${fullPath}:${line}:${column}`));
+      return;
     }
 
     next();
