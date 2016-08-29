@@ -1,6 +1,8 @@
 Specht
 ======
 
+[![Build Status](https://secure.travis-ci.org/princed/specht.png)](http://travis-ci.org/princed/specht)
+
 ## Installation
 
 ```
