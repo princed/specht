@@ -49,7 +49,7 @@ Options:
 
 ### Programmatic 
 
-See fields descriptions above, however there is no defaults.
+See fields descriptions above, however there are no defaults for programmatic usage
 
 ```js
 import createRunner from 'specht';
