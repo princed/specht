@@ -10,7 +10,10 @@ $ npm install specht --save
 ```
 
 ## Usage
-```
+
+### CLI
+
+```sh
 $ specht --help
 
 Usage: specht [path] [options]
@@ -42,4 +45,25 @@ Options:
   --js-extension    Extensions of JavaScript files    [array] [default: [".js"]]
   --teamcity        Report check results to TeamCity                   [boolean]
   --help            Show help                                          [boolean]
+```
+
+### Programmatic 
+
+See fields descriptions above, however there is no defaults.
+
+```js
+import createRunner from 'specht';
+
+const runner = createRunner();
+
+runner.start({
+ rootDir,
+ pattern,  
+ ignoreFile,
+ teamcity,
+ htmlExtension,
+ htmlRules,
+ jsExtension,
+ jsRules
+});
 ```

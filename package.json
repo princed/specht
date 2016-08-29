@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "description": "Check links found in html or js files by pattern",
   "bin": "lib/cli.js",
+  "main": "lib/runner.js",
   "license": "MIT",
   "author": {
     "name": "Eugene Datsky",
