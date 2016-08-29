@@ -2,15 +2,23 @@
   "name": "specht",
   "version": "1.0.0",
   "description": "Check links found in html or js files by pattern",
-  "bin": "lib/index.js",
+  "bin": "lib/cli.js",
   "license": "MIT",
   "author": {
     "name": "Eugene Datsky",
     "email": "eugene@datsky.ru"
   },
+  "ava": {
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
+  },
   "scripts": {
     "lint": "eslint src",
-    "prepublish": "babel src --out-dir lib --source-maps"
+    "test": "ava test/**/*Spec.js --source=src/**/*.js --fail-fast",
+    "build": "babel src --out-dir lib --source-maps",
+    "prepublish": "npm run build"
   },
   "files": [
     "lib"
@@ -35,11 +43,14 @@
     "yargs": "3.32.0"
   },
   "devDependencies": {
+    "ava": "^0.16.0",
     "babel-cli": "6.4.5",
     "babel-eslint": "^6.1.2",
     "babel-preset-es2015": "^6.13.2",
     "eslint": "^3.3.1",
     "eslint-config-airbnb-base": "^5.0.3",
-    "eslint-plugin-import": "^1.14.0"
+    "eslint-plugin-import": "^1.14.0",
+    "mock-fs": "^3.11.0",
+    "sinon": "^1.17.5"
   }
 }
