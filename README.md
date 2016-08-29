@@ -1,7 +1,7 @@
 Specht
 ======
 
-[![Build Status](https://secure.travis-ci.org/princed/specht.png)](http://travis-ci.org/princed/specht)
+[![Dependency Status](https://img.shields.io/david/princed/specht.svg?style=flat-square)](https://david-dm.org/princed/specht) [![Current version](https://img.shields.io/npm/v/specht.svg?style=flat-square)](https://www.npmjs.com/package/specht) [![Travis Build Status](https://img.shields.io/travis/princed/specht.svg?style=flat-square)](https://travis-ci.org/princed/specht)
 
 ## Installation
 
