@@ -1,28 +1,25 @@
 /* eslint import/no-extraneous-dependencies:0 import/imports-first:0, no-use-before-define:0*/
-import test from 'ava';
-import readdir from '../src/readdir';
 import mock from 'mock-fs';
-import enableHackForMockFs from './enable-hack-for-mock-fs';
+import test from 'ava';
 
+// Require synchronously to avoid issues with mock-fs and lazy require in readdirp
+// eslint-disable-next-line no-unused-vars
+import readdirpStream from 'readdirp/stream-api';
 
-let restore;
-let rootDir;
+import readdir from '../src/readdir';
+
+const rootDir = '/foo';
+
 test.beforeEach(() => {
-  rootDir = '/foo';
-
-  const testFs = mock.fs({
+  mock({
     '/foo': {
       'bar.js': 'zoo("test")'
     }
   });
-
-  restore = enableHackForMockFs(testFs);
 });
 
 
-test.afterEach.always(() => {
-  restore();
-});
+test.afterEach.always(mock.restore);
 
 
 test.cb('should call on onReadFile', (t) => {

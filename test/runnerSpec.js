@@ -1,28 +1,21 @@
 /* eslint import/no-extraneous-dependencies:0 import/imports-first:0, no-use-before-define:0*/
-import test from 'ava';
-import createRunner from '../src/runner';
+import re from 'readdirp/stream-api';
 import mock from 'mock-fs';
+
+import test from 'ava';
 import sinon from 'sinon';
-import enableHackForMockFs from './enable-hack-for-mock-fs';
-import fs from 'fs';
 
+import createRunner from '../src/runner';
 
-let restore;
 test.before(() => {
   mock({
     '/foo': {
       'bar.js': 'zoo("zooTestUrlFromJs"); moo(null, "mooTestUrlFromJs");'
     }
   });
-
-  restore = enableHackForMockFs(fs);
 });
 
-test.after.always(() => {
-  mock.restore();
-  restore();
-});
-
+test.after.always(mock.restore);
 
 let runner;
 test.beforeEach(() => {
@@ -31,7 +24,7 @@ test.beforeEach(() => {
 
 
 test.cb('should get links from javascript file', (t) => {
-  sinon.stub(runner, 'checkUrls', (document) => {
+  sinon.stub(runner, 'checkUrls').callsFake((document) => {
     t.is(document, 'zooTestUrlFromJs');
     t.pass();
     t.end();
@@ -47,7 +40,7 @@ test.cb('should get links from javascript file', (t) => {
 
 
 test.cb('should allow pass custom argument position', (t) => {
-  sinon.stub(runner, 'checkUrls', (document) => {
+  sinon.stub(runner, 'checkUrls').callsFake((document) => {
     t.is(document, 'mooTestUrlFromJs');
     t.pass();
     t.end();
@@ -69,7 +62,7 @@ test.cb('should request url', (t) => {
   const pattern = `${baseUrl}/%s`;
   const expectedUrl = `${baseUrl}/${link}`;
 
-  sinon.stub(runner, 'requestUrl', (url, onSuccess, onError) => {
+  sinon.stub(runner, 'requestUrl').callsFake((url, onSuccess, onError) => {
     t.is(url, expectedUrl);
     t.is(typeof onSuccess, 'function');
     t.is(typeof onError, 'function');
@@ -116,7 +109,7 @@ test('should allow add hook which prevent check url', (t) => {
 
   runner.updateConfig({
     pattern: '%s',
-    beforeCheckUrl: (url) => url !== 'foo'
+    beforeCheckUrl: url => url !== 'foo'
   });
   sinon.stub(runner, 'requestUrl');
 
