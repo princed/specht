@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import 'babel-polyfill';
 import {testStarted, testFinished, testFailed} from 'teamcity-service-messages';
 

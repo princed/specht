@@ -4,7 +4,7 @@ export default function convertRules(rules, defaultValue) {
   const RULE_DELIMITER = ':';
   const lookup = new Map();
 
-  rules.forEach(rule => {
+  rules.forEach((rule) => {
     const [key, ...ruleParts] = rule.split(RULE_DELIMITER);
 
     switch (ruleParts.length) {

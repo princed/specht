@@ -27,7 +27,7 @@ function parseCode(code, rules, push) {
   });
 
   traverse(ast, {
-    enter: path => {
+    enter: (path) => {
       if (!t.isCallExpression(path.node) || !t.isIdentifier(path.node.callee)) {
         return;
       }

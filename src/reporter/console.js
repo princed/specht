@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import 'babel-polyfill';
 
 export default class ConsoleReporter {
@@ -6,6 +7,7 @@ export default class ConsoleReporter {
   }
 
   printMessage(message) {
+    // eslint-disable-next-line no-console
     console.log(message);
   }
 }

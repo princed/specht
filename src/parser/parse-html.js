@@ -8,7 +8,7 @@ export default function parseHTML({fullPath, rules, push, next}) {
     const attribute = rules.get(name);
 
     if (attribute) {
-      attrs.forEach(attr => {
+      attrs.forEach((attr) => {
         if (attr.name === attribute) {
           push(attr.value);
         }

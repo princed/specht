@@ -39,7 +39,7 @@ export default function createRunner() {
     ignoreFile: '',
     teamcity: false,
 
-    beforeCheckUrl: (url) => url
+    beforeCheckUrl: url => url
   };
 
 
@@ -77,7 +77,7 @@ export default function createRunner() {
     const fullPath = file.fullPath;
     const documents = runner.documents;
 
-    const onFindDocumentLink = document => {
+    const onFindDocumentLink = (document) => {
       if (!documents.has(document)) {
         push(document);
         documents.set(document, file.path);
@@ -150,6 +150,7 @@ export default function createRunner() {
 
   runner.onFinish = () => {
     const ms = 1000;
+    // eslint-disable-next-line no-console
     console.log(`Finished in ${(Date.now() - runner.startTime) / ms}s`);
   };
 
