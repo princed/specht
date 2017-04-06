@@ -45,6 +45,8 @@ export default function createRunner() {
 
 
   runner.start = function start(params = {}) {
+    runner.count = 0;
+
     const {htmlExtension, jsExtension, htmlRules, jsRules, rootDir, ignoreFile, maxConcurrency} = runner.updateConfig(params);
 
     const htmlParams = {parser: parseHTML, rules: convertRules(htmlRules)};
@@ -135,6 +137,8 @@ export default function createRunner() {
       sourceFilePath: runner.documents.get(document)
     };
 
+    runner.count += 1;
+
     if (teamcity) {
       teamcityReporter.onTestResult(result);
       return;
@@ -152,7 +156,7 @@ export default function createRunner() {
   runner.onFinish = () => {
     const ms = 1000;
     // eslint-disable-next-line no-console
-    console.log(`Finished in ${(Date.now() - runner.startTime) / ms}s`);
+    console.log(`Checked ${runner.count} URIs in ${(Date.now() - runner.startTime) / ms}s`);
   };
 
   return runner;
