@@ -74,15 +74,14 @@ export default function createRunner() {
   };
 
 
-  runner.getUrls = function getUrls(file, {next, push}) {
-    const {rules, parser} = runner.langProps.get(extname(file.name)) || {};
-    const fullPath = file.fullPath;
+  runner.getUrls = function getUrls(fullPath, {next, push}) {
+    const {rules, parser} = runner.langProps.get(extname(fullPath)) || {};
     const documents = runner.documents;
 
     const onFindDocumentLink = (document) => {
       if (!documents.has(document)) {
         push(document);
-        documents.set(document, file.path);
+        documents.set(document, fullPath);
       }
     };
 

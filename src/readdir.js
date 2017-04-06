@@ -1,48 +1,29 @@
 import through2Concurrent from 'through2-concurrent';
-import readdirp from 'readdirp';
+import readdir from 'readdir-enhanced';
 import ignore from 'ignore-file';
 import {resolve, extname} from 'path';
-
-function File({name, path, fullPath}, encode) {
-  return {
-    name,
-    path,
-    fullPath,
-    encode
-  };
-}
-
 
 function getIgnoreFilters({rootDir, extensions = [], ignoreFile = ''}) {
   let filterByExtension = () => true;
 
   if (extensions.length) {
-    filterByExtension = entry => extensions.includes(extname(entry.name));
+    filterByExtension = entry => extensions.includes(extname(entry.path));
   }
 
   if (!ignoreFile) {
-    return {
-      fileFilter: filterByExtension
-    };
+    return filterByExtension;
   }
 
   const filter = ignore.sync(resolve(rootDir, ignoreFile));
-  const fileFilter = entry => filterByExtension(entry) && !filter(entry.path);
-  const directoryFilter = entry => !filter(entry.path);
 
-  return {
-    fileFilter,
-    directoryFilter
-  };
+  return entry => !filter(entry.path) && (!entry.isFile() || filterByExtension(entry));
 }
 
 export default {
-  read: (workingDirectory, {extensions, ignoreFile, maxConcurrency, onReadFile, onReadDocument, onTestResult, onFinish}) => {
+  read: (rootDir, {extensions, ignoreFile, maxConcurrency, onReadFile, onReadDocument, onTestResult, onFinish}) => {
     function callOnFileHandler(fileInfo, encode, next) {
-      const file = new File(fileInfo, encode);
-
       if (onReadFile) {
-        onReadFile(file, {
+        onReadFile(fileInfo, {
           next,
           push: this.push.bind(this)
         });
@@ -67,18 +48,11 @@ export default {
       }
     }
 
-    const ignoreFilters = getIgnoreFilters({
-      rootDir: workingDirectory,
-      extensions,
-      ignoreFile
-    });
+    const basePath = resolve(rootDir);
+    const filter = getIgnoreFilters({rootDir, extensions, ignoreFile});
 
     /* eslint dot-location:0*/
-    return readdirp({
-      root: workingDirectory,
-      fileFilter: ignoreFilters.fileFilter,
-      directoryFilter: ignoreFilters.directoryFilter
-    })
+    return readdir.stream(rootDir, {basePath, filter, deep: true})
       .pipe(through2Concurrent.obj({maxConcurrency}, callOnFileHandler))
       .pipe(through2Concurrent.obj({maxConcurrency}, callOnReadDocument))
       .on('data', callOnTestResultHandler)
