@@ -1,5 +1,3 @@
-/* eslint import/no-extraneous-dependencies:0 import/imports-first:0, no-use-before-define:0*/
-import re from 'readdirp/stream-api';
 import mock from 'mock-fs';
 
 import test from 'ava';
