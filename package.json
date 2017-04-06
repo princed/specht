@@ -1,6 +1,6 @@
 {
   "name": "specht",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Check links found in html or js files by pattern",
   "bin": "lib/cli.js",
   "main": "lib/runner.js",
