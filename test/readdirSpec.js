@@ -2,10 +2,6 @@
 import mock from 'mock-fs';
 import test from 'ava';
 
-// Require synchronously to avoid issues with mock-fs and lazy require in readdirp
-// eslint-disable-next-line no-unused-vars
-import readdirpStream from 'readdirp/stream-api';
-
 import readdir from '../src/readdir';
 
 const rootDir = '/foo';
