@@ -1,4 +1,4 @@
-import through2 from 'through2';
+import through2Concurrent from 'through2-concurrent';
 import readdirp from 'readdirp';
 import ignore from 'ignore-file';
 import {resolve, extname} from 'path';
@@ -37,7 +37,7 @@ function getIgnoreFilters({rootDir, extensions = [], ignoreFile = ''}) {
 }
 
 export default {
-  read: (workingDirectory, {extensions, ignoreFile, onReadFile, onReadDocument, onTestResult, onFinish}) => {
+  read: (workingDirectory, {extensions, ignoreFile, maxConcurrency, onReadFile, onReadDocument, onTestResult, onFinish}) => {
     function callOnFileHandler(fileInfo, encode, next) {
       const file = new File(fileInfo, encode);
 
@@ -78,9 +78,9 @@ export default {
       root: workingDirectory,
       fileFilter: ignoreFilters.fileFilter,
       directoryFilter: ignoreFilters.directoryFilter
-    }).pipe(through2.obj({
-      objectMode: true
-    }, callOnFileHandler)).pipe(through2.obj(callOnReadDocument))
+    })
+      .pipe(through2Concurrent.obj({maxConcurrency}, callOnFileHandler))
+      .pipe(through2Concurrent.obj({maxConcurrency}, callOnReadDocument))
       .on('data', callOnTestResultHandler)
       .on('finish', callOnFinishHandler);
   }

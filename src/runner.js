@@ -37,6 +37,7 @@ export default function createRunner() {
     jsRules: [],
 
     ignoreFile: '',
+    maxConcurrency: 1,
     teamcity: false,
 
     beforeCheckUrl: url => url
@@ -44,19 +45,20 @@ export default function createRunner() {
 
 
   runner.start = function start(params = {}) {
-    const config = runner.updateConfig(params);
+    const {htmlExtension, jsExtension, htmlRules, jsRules, rootDir, ignoreFile, maxConcurrency} = runner.updateConfig(params);
 
-    const htmlParams = {parser: parseHTML, rules: convertRules(config.htmlRules)};
-    config.htmlExtension.forEach(ext => runner.langProps.set(ext, htmlParams));
+    const htmlParams = {parser: parseHTML, rules: convertRules(htmlRules)};
+    htmlExtension.forEach(ext => runner.langProps.set(ext, htmlParams));
 
-    const jsParams = {parser: parseJS, rules: convertRules(config.jsRules, 0)};
-    config.jsExtension.forEach(ext => runner.langProps.set(ext, jsParams));
+    const jsParams = {parser: parseJS, rules: convertRules(jsRules, 0)};
+    jsExtension.forEach(ext => runner.langProps.set(ext, jsParams));
 
 
     runner.onStart();
-    readdir.read(config.rootDir, {
-      ignoreFile: config.ignoreFile,
-      extensions: [].concat(config.htmlExtension).concat(config.jsExtension),
+    readdir.read(rootDir, {
+      ignoreFile,
+      maxConcurrency,
+      extensions: [].concat(htmlExtension).concat(jsExtension),
 
       onReadFile: runner.getUrls,
       onReadDocument: runner.checkUrls,

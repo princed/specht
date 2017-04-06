@@ -10,6 +10,7 @@ const {
   jsRules,
   htmlRules,
   ignoreFile,
+  maxConcurrency,
   help,
   teamcity,
   _: [rootDir = process.cwd()]
@@ -54,6 +55,9 @@ option('teamcity', {
   describe: 'Report check results to TeamCity',
   boolean: true
 }).
+option('max-concurrency', {
+  describe: 'Maximal number of files being processed and requests being sent concurrently'
+}).
 help('help').
   argv;
 
@@ -68,6 +72,7 @@ if (!help) {
     rootDir,
     pattern,
     ignoreFile,
+    maxConcurrency,
     teamcity,
     htmlExtension,
     htmlRules,
