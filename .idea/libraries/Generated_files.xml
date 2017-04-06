@@ -8,17 +8,25 @@
         <item url="file://$PROJECT_DIR$/lib/convert-rules.js" />
         <item url="file://$PROJECT_DIR$/lib/cli.js" />
         <item url="file://$PROJECT_DIR$/lib/runnerSpec.js" />
+        <item url="file://$PROJECT_DIR$/lib/runner.js" />
+        <item url="file://$PROJECT_DIR$/lib/runnerSpec.js" />
         <item url="file://$PROJECT_DIR$/lib/readdirSpec.js" />
+        <item url="file://$PROJECT_DIR$/lib/cli.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/index.js" />
+      <root url="file://$PROJECT_DIR$/lib/readdirSpec.js" />
       <root url="file://$PROJECT_DIR$/lib/readdir.js" />
       <root url="file://$PROJECT_DIR$/lib/runner.js" />
       <root url="file://$PROJECT_DIR$/lib/index.js" />
       <root url="file://$PROJECT_DIR$/lib/convert-rules.js" />
       <root url="file://$PROJECT_DIR$/lib/cli.js" />
       <root url="file://$PROJECT_DIR$/lib/runnerSpec.js" />
+      <root url="file://$PROJECT_DIR$/lib/runner.js" />
+      <root url="file://$PROJECT_DIR$/lib/runnerSpec.js" />
       <root url="file://$PROJECT_DIR$/lib/readdirSpec.js" />
+      <root url="file://$PROJECT_DIR$/lib/cli.js" />
     </CLASSES>
     <SOURCES />
   </library>

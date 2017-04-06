@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ProjectTasksOptions">
     <TaskOptions isEnabled="true">
-      <option name="arguments" value="--source-maps --out-file $FileParentDir$/lib/$FileName$ $FilePath$" />
+      <option name="arguments" value="$ProjectFileDir$/src --out-dir $ProjectFileDir$/lib --source-maps" />
       <option name="checkSyntaxErrors" value="false" />
-      <option name="description" value="Transpiles ECMAScript 6 code to ECMAScript 5" />
+      <option name="description" />
       <option name="exitCodeBehavior" value="NEVER" />
       <option name="fileExtension" value="js" />
       <option name="immediateSync" value="true" />
       <option name="name" value="Babel" />
-      <option name="output" value="$FileParentDir$/lib/$FileName$:$FileParentDir$/lib/$FileName$.map" />
+      <option name="output" value="$ProjectFileDir$/lib" />
       <option name="outputFilters">
         <array />
       </option>
