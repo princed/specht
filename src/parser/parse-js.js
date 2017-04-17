@@ -26,33 +26,55 @@ export function parseCode(code, rules, push) {
     ]
   });
 
+  function addError(name, argument) {
+    errors.push({name, pos: argument.loc.start});
+    return errors;
+  }
+
+  function getBinding(path, argument) {
+    const binding = path.scope.getBinding(argument.name);
+    return binding && binding.path.node;
+  }
+
+  function getVarValue(path, argument) {
+    if (!t.isIdentifier(argument)) {
+      return false;
+    }
+
+    const node = getBinding(path, argument);
+    return node && t.isVariableDeclarator(node) && node.init;
+  }
+
   traverse(ast, {
     enter: (path) => {
-      if (!t.isCallExpression(path.node) || !t.isIdentifier(path.node.callee)) {
+      if (
+        !t.isCallExpression(path.node) ||
+        !t.isIdentifier(path.node.callee)
+      ) {
         return;
       }
 
       const name = path.node.callee.name;
       const argumentPosition = rules.get(name);
 
-      if (!isNaN(argumentPosition)) {
-        const argument = path.node.arguments[argumentPosition];
-
-        if (t.isStringLiteral(argument)) {
-          push(argument.value);
-        } else if (t.isIdentifier(argument)) {
-          const binding = path.scope.getBinding(argument.name);
-          const node = binding && binding.path.node;
-
-          if (node && t.isVariableDeclarator(node) && t.isStringLiteral(node.init)) {
-            push(node.init.value);
-          } else {
-            errors.push({name, pos: argument.loc.start});
-          }
-        } else {
-          errors.push({name, pos: argument.loc.start});
-        }
+      if (isNaN(argumentPosition)) {
+        return;
       }
+
+      const argument = path.node.arguments[argumentPosition];
+
+      if (t.isStringLiteral(argument)) {
+        push(argument.value);
+        return;
+      }
+
+      const value = getVarValue(path, argument);
+      if (t.isStringLiteral(value)) {
+        push(value);
+        return;
+      }
+
+      addError(name, argument);
     }
   });
 
