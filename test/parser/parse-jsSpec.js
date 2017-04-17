@@ -17,6 +17,21 @@ test('should add matched rule to the result', (t) => {
 });
 
 
+test('should pass context to the push/result function', (t) => {
+  const result = [];
+  const rules = convertRuels(['foo:0']);
+
+
+  parseCode('foo("pre","1", "post")', rules, (value, context) => {
+    t.deepEqual(context.args(), ['pre', '1', 'post']);
+    result.push(value);
+  });
+
+
+  t.is(result.length, 1);
+});
+
+
 test('should return empty result if we don`t found any matches', (t) => {
   const result = [];
   const rules = convertRuels(['foo:0']);
