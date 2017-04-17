@@ -1,9 +1,11 @@
 import mock from 'mock-fs';
 
 import test from 'ava';
-import sinon from 'sinon';
+import {sandbox} from 'sinon';
 
 import createRunner from '../src/runner';
+
+const sinon = sandbox.create();
 
 test.before(() => {
   mock({
@@ -14,6 +16,7 @@ test.before(() => {
 });
 
 test.after.always(mock.restore);
+test.after.always(() => sinon.restore());
 
 let runner;
 test.beforeEach(() => {
