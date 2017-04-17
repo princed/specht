@@ -45,6 +45,18 @@ export function parseCode(code, rules, push) {
     return node && t.isVariableDeclarator(node) && node.init;
   }
 
+  function getLiteral(path, node) {
+    return t.isIdentifier(node) ? getVarValue(path, node) : node;
+  }
+
+  function createContext(path) {
+    const node = path.node;
+    return {
+      args: () =>
+        node.arguments.map(getLiteral.bind(null, path)).filter(it => it).map(it => it.value)
+    };
+  }
+
   traverse(ast, {
     enter: (path) => {
       if (
@@ -62,15 +74,10 @@ export function parseCode(code, rules, push) {
       }
 
       const argument = path.node.arguments[argumentPosition];
+      const argValue = getLiteral(path, argument);
 
-      if (t.isStringLiteral(argument)) {
-        push(argument.value);
-        return;
-      }
-
-      const value = getVarValue(path, argument);
-      if (t.isStringLiteral(value)) {
-        push(value);
+      if (t.isStringLiteral(argValue)) {
+        push(argument.value, createContext(path));
         return;
       }
 
