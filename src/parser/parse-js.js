@@ -4,7 +4,7 @@ import {parse} from 'babylon';
 import traverse from 'babel-traverse';
 import * as t from 'babel-types';
 
-function parseCode(code, rules, push) {
+export function parseCode(code, rules, push) {
   const errors = [];
   const ast = parse(code, {
     sourceType: 'module',
@@ -49,6 +49,8 @@ function parseCode(code, rules, push) {
           } else {
             errors.push({name, pos: argument.loc.start});
           }
+        } else {
+          errors.push({name, pos: argument.loc.start});
         }
       }
     }
