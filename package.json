@@ -17,7 +17,7 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "test": "ava test/**/*Spec.js --source=src/**/*.js --fail-fast",
+    "test": "ava --source=src/**/*.js --fail-fast",
     "build": "babel src --out-dir lib --source-maps",
     "prepublish": "npm run build"
   },
