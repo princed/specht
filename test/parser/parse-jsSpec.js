@@ -1,11 +1,11 @@
 import test from 'ava';
 import {parseCode} from '../../src/parser/parse-js';
-import convertRuels from '../../src/convert-rules';
+import convertRules from '../../src/convert-rules';
 
 
 test('should add matched rule to the result', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
 
   parseCode('foo("1")', rules, (value) => {
@@ -19,7 +19,7 @@ test('should add matched rule to the result', (t) => {
 
 test('should pass context to the push/result function', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:1']);
+  const rules = convertRules(['foo:1']);
 
 
   parseCode('foo("pre","1", "post")', rules, (value, context) => {
@@ -34,7 +34,7 @@ test('should pass context to the push/result function', (t) => {
 
 test('should return empty result if we don`t found any matches', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
 
   parseCode('var bar = function(a){}; bar("1"); zoo("1")', rules, value => result.push(value));
@@ -46,7 +46,7 @@ test('should return empty result if we don`t found any matches', (t) => {
 
 test('should parse multiple expressions', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0', 'bar:0']);
+  const rules = convertRules(['foo:0', 'bar:0']);
 
 
   parseCode('foo("1"); bar("2")', rules, (value) => {
@@ -60,7 +60,7 @@ test('should parse multiple expressions', (t) => {
 
 test('should parse identifiers', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
 
   parseCode('var a = "1"; foo(a);', rules, (value) => {
@@ -73,7 +73,7 @@ test('should parse identifiers', (t) => {
 
 
 test('should return error if argument is not a string', (t) => {
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
   const errors = parseCode('foo(100);', rules, () => {
   });
@@ -84,7 +84,7 @@ test('should return error if argument is not a string', (t) => {
 
 
 test('should return error if identifier is not a string', (t) => {
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
   const errors = parseCode('var a = 1; foo(a);', rules, () => {
   });
@@ -96,7 +96,7 @@ test('should return error if identifier is not a string', (t) => {
 
 test('should not report error rule argument is not a number', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:Not_a_Number']);
+  const rules = convertRules(['foo:Not_a_Number']);
 
   const errors = parseCode('foo("1");', rules, value => result.push(value));
 
@@ -108,7 +108,7 @@ test('should not report error rule argument is not a number', (t) => {
 
 test('should parse only functions', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
 
   parseCode('var foo = "1";', rules, value => result.push(value));
@@ -120,7 +120,7 @@ test('should parse only functions', (t) => {
 
 test('should parse identifiers are referenced on a function', (t) => {
   const result = [];
-  const rules = convertRuels(['foo:0']);
+  const rules = convertRules(['foo:0']);
 
 
   parseCode('var foo = function(a){}; foo("1");', rules, value => result.push(value));
