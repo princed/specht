@@ -10,7 +10,9 @@ const sinon = sandbox.create();
 test.before(() => {
   mock({
     '/foo': {
-      'bar.js': 'zoo("zooTestUrlFromJs"); moo(null, "mooTestUrlFromJs");'
+      'bar.js': 'zoo("zooTestUrlFromJs"); moo(null, "mooTestUrlFromJs");',
+      'bar.html': '<zoo href="zooTestUrlFromHTML"></zoo>',
+      'bar.xml': '<zoo xlink:href="zooTestUrlFromXML"></zoo>'
     }
   });
 });
@@ -36,6 +38,38 @@ test.cb('should get links from javascript file', (t) => {
     rootDir: '/foo',
     jsExtension: ['.js'],
     jsRules: ['zoo:0']
+  });
+});
+
+
+test.cb('should get links from HTML file', (t) => {
+  sinon.stub(runner, 'checkUrls').callsFake((document) => {
+    t.is(document, 'zooTestUrlFromHTML');
+    t.pass();
+    t.end();
+  });
+
+
+  runner.start({
+    rootDir: '/foo',
+    htmlExtension: ['.html'],
+    htmlRules: ['zoo:href']
+  });
+});
+
+
+test.cb('should get links from XML attribute with namespace', (t) => {
+  sinon.stub(runner, 'checkUrls').callsFake((document) => {
+    t.is(document, 'zooTestUrlFromXML');
+    t.pass();
+    t.end();
+  });
+
+
+  runner.start({
+    rootDir: '/foo',
+    htmlExtension: ['.xml'],
+    htmlRules: ['zoo:xlink:href']
   });
 });
 
