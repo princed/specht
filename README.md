@@ -1,9 +1,7 @@
 Specht
 ======
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/princed/specht.svg)](https://greenkeeper.io/)
-
-[![Dependency Status](https://img.shields.io/david/princed/specht.svg?style=flat-square)](https://david-dm.org/princed/specht) [![Current version](https://img.shields.io/npm/v/specht.svg?style=flat-square)](https://www.npmjs.com/package/specht) [![Travis Build Status](https://img.shields.io/travis/princed/specht.svg?style=flat-square)](https://travis-ci.org/princed/specht)
+[![Dependency Status](https://img.shields.io/david/princed/specht.svg?style=flat-square)](https://david-dm.org/princed/specht) [![Greenkeeper badge](https://badges.greenkeeper.io/princed/specht.svg)](https://greenkeeper.io/) [![Current version](https://img.shields.io/npm/v/specht.svg?style=flat-square)](https://www.npmjs.com/package/specht) [![Travis Build Status](https://img.shields.io/travis/princed/specht.svg?style=flat-square)](https://travis-ci.org/princed/specht)
 
 ## Installation
 
