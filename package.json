@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "babel-polyfill": "6.23.0",
-    "babel-traverse": "6.24.1",
+    "babel-traverse": "6.25.0",
     "babel-types": "6.24.1",
     "babylon": "6.17.1",
     "ignore-file": "1.1.2",
