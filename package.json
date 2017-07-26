@@ -53,6 +53,6 @@
     "eslint-config-airbnb-base": "^11.1.2",
     "eslint-plugin-import": "^2.2.0",
     "mock-fs": "^4.2.0",
-    "sinon": "^2.1.0"
+    "sinon": "^2.4.1"
   }
 }
