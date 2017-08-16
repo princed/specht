@@ -32,7 +32,7 @@
     "url": "https://github.com/princed/specht/issues"
   },
   "dependencies": {
-    "babel-polyfill": "6.23.0",
+    "babel-polyfill": "6.26.0",
     "babel-traverse": "6.25.0",
     "babel-types": "6.24.1",
     "babylon": "6.17.3",
