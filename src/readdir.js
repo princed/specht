@@ -51,7 +51,7 @@ export default {
     const basePath = resolve(rootDir);
     const filter = getIgnoreFilters({rootDir, extensions, ignoreFile});
 
-    /* eslint dot-location:0*/
+    /* eslint dot-location:0 */
     return readdir.stream(rootDir, {basePath, filter, deep: true})
       .pipe(through2Concurrent.obj({maxConcurrency}, callOnFileHandler))
       .pipe(through2Concurrent.obj({maxConcurrency}, callOnReadDocument))
